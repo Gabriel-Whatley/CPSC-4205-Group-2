@@ -1,0 +1,14 @@
+h1{
+    color: blue;
+}
+
+table{
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    padding: 10px;
+    border: 1px solid;
+    text-align: left;
+
+    tr:nth-child(even){background-color: #f2f2f2;}
+}
