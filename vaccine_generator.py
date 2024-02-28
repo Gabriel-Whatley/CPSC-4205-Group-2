@@ -23,18 +23,18 @@ month_end_dict = {
 }
 
 
-def random_letters(length: int) -> string: # Generate a string of random uppercase letters with user defined length
+def random_letters(length: int) -> string:  # Generate a string of random uppercase letters with user defined length
 	random_letters_id = ''.join(random.choice(string.ascii_uppercase) for i in range(length))
 	return random_letters_id
 
 
-def random_numbers(length: int) -> string: # Generate a string of random numbers with user defined length
+def random_numbers(length: int) -> string:  # Generate a string of random numbers with user defined length
 	random_numbers_id = ''.join(random.choice(string.digits) for i in range(length))
 	return random_numbers_id
 
 
 def generate_vaccines(amount: int):  # Generate random vaccine test data and add it to the database.
-	for i in range(0,amount):  # Loop number of times specified by user.
+	for i in range(0, amount):  # Loop number of times specified by user.
 		manu_num = round(random.randrange(1,5))  # Generate a random manufacturer number 1 through 5
 		match manu_num:  # Based on the randomly generated manufacturer number, generate a random lot number and assign the manufacturer name.
 			case 1:
