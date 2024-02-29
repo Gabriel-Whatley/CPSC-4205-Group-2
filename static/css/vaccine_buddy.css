@@ -13,9 +13,7 @@ table{
     tr:nth-child(even){background-color: #f2f2f2;}
 }
 
-styledimg {
-    background-image: url(../VaccineBuddyLogo100.png);
-    background-repeat: no-repeat;
-    width: 100px;
-    height: 70px;
+#styledimg {
+    width: 130px;
+    height: 100px;
     }
