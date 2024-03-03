@@ -39,7 +39,7 @@ def random_numbers(length: int) -> string:  # Generate a string of random number
 
 def generate_vaccines(amount: int):  # Generate random vaccine test data and add it to the database.
 	for i in range(0, amount):  # Loop number of times specified by user.
-		manu_num = round(random.randrange(1,5))  # Generate a random manufacturer number 1 through 5.
+		manu_num = round(random.randrange(1, 5))  # Generate a random manufacturer number 1 through 5.
 		match manu_num:  # Based on the randomly generated manufacturer number, generate a random lot number and assign the manufacturer name.
 			case 1:
 				manu_name = "Astra Zeneca"
@@ -60,7 +60,7 @@ def generate_vaccines(amount: int):  # Generate random vaccine test data and add
 		month_end = month_end_dict.get(rand_month)  # From the random month, look up the last day from month_end_dict.
 		mydict = {"manufacturer": manu_name, "lotNum": lot_num, "expDate": datetime.datetime(year=2024, month=rand_month, day=random.randint(1, month_end))}  # Generate the vaccine record using all previously generated data.
 		result = mycol.insert_one(mydict)  # Add the vaccine record to the database.
-		print(result) #  Print the results of the action to the console.
+		print(result)  # Print the results of the action to the console.
 
 
 def main():
