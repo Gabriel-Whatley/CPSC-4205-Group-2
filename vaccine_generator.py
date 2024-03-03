@@ -64,4 +64,7 @@ def generate_vaccines(amount: int):  # Generate random vaccine test data and add
 
 
 def main():
-	generate_vaccines(600)
+	generate_vaccines(800)
+
+
+main()
