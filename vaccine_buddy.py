@@ -56,12 +56,14 @@ def expired():
 
 @app.route("/add")
 def add():
-    return render_template("pagetemplate.html")
+    add_form = "Add vaccine form goes here"
+    return render_template("pagetemplate.html", pagecontent=add_form)
 
 
 @app.route("/remove")
 def remove():
-    return render_template("pagetemplate.html")
+    remove_form = "Remove vaccine / Remove all expired form goes here"
+    return render_template("pagetemplate.html", pagecontent=remove_form)
 
 
 @app.route("/showall")
