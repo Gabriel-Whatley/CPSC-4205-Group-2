@@ -6,6 +6,9 @@ from datetime import timedelta
 # flask app settings
 app = Flask(__name__)
 
+# Timezone constant used to adjust the time zone for page update timestamps.
+TIMEZONE = -5
+
 # Mongo database connection settings
 client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority")
 mydb = client["vaccine_buddy"]  # Name of the database
@@ -34,6 +37,12 @@ def mongoqueryall() -> list:  # Run a query to show all of the items in the data
 def mongoqueryexpired() -> list:  # Run a query to show all of the items that have an expiry date that has already passed.
     mongo_query_results = list(mycol.find({"expDate": {"$lt": datetime.now()}}, projection={"_id": 0}).sort("expDate", 1))
     return mongo_query_results  # Returns a list
+
+
+def datetimestamp() -> str:  # Creates a formatted time stamp based on the TIMEZONE constant.
+    date_time_temp = datetime.utcnow() + timedelta(hours=TIMEZONE)
+    stamp = date_time_temp.strftime('Updated at: %#H:%#M:%#S - %A, %B %#d %Y')
+    return stamp
 
 
 @app.route("/")
