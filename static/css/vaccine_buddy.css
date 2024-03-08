@@ -1,19 +1,22 @@
-h1{
-    color: blue;
-}
-
-table{
+/* For the table of results printed out from the queries */
+table {
     margin-left: auto;
     margin-right: auto;
     width: 75%;
     padding: 10px;
     border: 1px solid;
     text-align: left;
-
     tr:nth-child(even){background-color: #f2f2f2;}
-}
+    }
 
-#styledimg {
+/* For the logo in the upper left corner of the screen */
+#logoimg {
     width: 130px;
     height: 100px;
+    }
+
+/* Properties for navbar */
+#navbar {
+    background-color: #1F73C1;
+    font-weight: bold;
     }
