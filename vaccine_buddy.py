@@ -61,55 +61,55 @@ def datetimestamp() -> str:  # Creates a formatted date/time stamp. Adjusted by 
 @app.route("/")  # Displays a list of all vaccines expiring between today and 2 weeks from today.
 def weeks2():
     results_output_html = renderlist(mongoqueryweeks(2))
-    return render_template("pagetemplate.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html)
 
 
 @app.route("/weeks4")  # Displays a list of all vaccines expiring between today and 4 weeks from today.
 def weeks4():
     results_output_html = renderlist(mongoqueryweeks(4))
-    return render_template("pagetemplate.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html)
 
 
 @app.route("/expired")  # Displays a list of all expired vaccines in the database.
 def expired():
     results_output_html = renderlist(mongoqueryexpired())
-    return render_template("pagetemplate.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html)
 
 
 @app.route("/add")  # Displays a form to add a vaccine to the database.
 def add():
     add_form = "Add vaccine form goes here"
-    return render_template("pagetemplate.html", pagecontent=add_form)
+    return render_template("queryresults.html", pagecontent=add_form)
 
 
 @app.route("/addresult")  # Displays confirmation of the query to add a vaccine to the database, shows what was added.
 def addresult():
     add_result = "Results of the vaccine addition operation"
-    return render_template("pagetemplate.html", pagecontent=add_result)
+    return render_template("queryresults.html", pagecontent=add_result)
 
 
 @app.route("/remove")  # Allows the user to remove either one vaccine, or remove all expired vaccines.
 def remove():
     remove_form = "Remove vaccine / Remove all expired form goes here"
-    return render_template("pagetemplate.html", pagecontent=remove_form)
+    return render_template("queryresults.html", pagecontent=remove_form)
 
 
 @app.route("/removequeryresult")  # Shows the confirmation screen listing the vaccines to be removed from the database.
 def removequeryresult():
     #remove_form_results = renderlist(list(mongoquerycustom(,,,)))
-    return render_template("pagetemplate.html")  # pagecontent=remove_form_results
+    return render_template("queryresults.html")  # pagecontent=remove_form_results
 
 
 @app.route("/removeactionfeedback")  # Shows the confirmation on whether the removal of the requested vaccines was successful.
 def removeactionfeedback():
     remove_action_results = "Remove action results go here"
-    return render_template("pagetemplate.html", pagecontent=remove_action_results)
+    return render_template("queryresults.html", pagecontent=remove_action_results)
 
 
 @app.route("/showall")  # Shows all of the vaccines in the database.
 def showall():
     results_output_html = renderlist(mongoqueryall())
-    return render_template("pagetemplate.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html)
 
 
 if __name__ == "__main__":
