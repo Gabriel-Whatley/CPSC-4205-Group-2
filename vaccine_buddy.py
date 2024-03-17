@@ -10,7 +10,7 @@ app = Flask(__name__)
 TIMEZONE = -5
 
 # Mongo database client connection settings
-client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority")
+client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
 mydb = client["vaccine_buddy"]  # Name of the database
 mycol = mydb["inventory"]  # Name of the collection
 
@@ -31,7 +31,8 @@ def mongoquerycustom(manu: str, expdate: datetime, lotnum: str) -> object:  # Ru
 
 
 def mongodelete(deleteobject: object) -> bool:  # Deletes the documents contained in a query object from the database.
-    deletelist = list(deleteobject)
+    # TODO: Finish this function so it deletes stuff.
+    mycol.delete_many(deleteobject)
     success = False
     return success
 
