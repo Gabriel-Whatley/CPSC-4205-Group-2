@@ -2,6 +2,8 @@ from flask import Flask, render_template
 import pymongo
 from datetime import datetime
 from datetime import timedelta
+from sessionmanager import SessionManager
+
 
 # flask app settings
 app = Flask(__name__)
@@ -13,6 +15,8 @@ TIMEZONE = -5
 client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
 mydb = client["vaccine_buddy"]  # Name of the database
 mycol = mydb["inventory"]  # Name of the collection
+
+sessionmanager = SessionManager(30)  # Creeate a new sessionmanager object to track query sessions.
 
 
 def renderlist(inputobj: object) -> str:  # Renders a mongo database query object as html table. Returns a string containing the HTML table.
@@ -61,26 +65,29 @@ def datetimestamp() -> str:  # Creates a formatted date/time stamp. Adjusted by 
 
 @app.route("/")  # Displays a list of all vaccines expiring between today and 2 weeks from today.
 def weeks2():
+    time_stamp = datetimestamp()
     results_output_html = renderlist(mongoqueryweeks(2))
-    return render_template("queryresults.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
 
 @app.route("/weeks4")  # Displays a list of all vaccines expiring between today and 4 weeks from today.
 def weeks4():
+    time_stamp = datetimestamp()
     results_output_html = renderlist(mongoqueryweeks(4))
-    return render_template("queryresults.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
 
 @app.route("/expired")  # Displays a list of all expired vaccines in the database.
 def expired():
+    time_stamp = datetimestamp()
     results_output_html = renderlist(mongoqueryexpired())
-    return render_template("queryresults.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
 
 @app.route("/add")  # Displays a form to add a vaccine to the database.
 def add():
     add_form = "Add vaccine form goes here"
-    return render_template("queryresults.html", pagecontent=add_form)
+    return render_template("addform.html", pagecontent=add_form)
 
 
 @app.route("/addresult")  # Displays confirmation of the query to add a vaccine to the database, shows what was added.
@@ -92,7 +99,7 @@ def addresult():
 @app.route("/remove")  # Allows the user to remove either one vaccine, or remove all expired vaccines.
 def remove():
     remove_form = "Remove vaccine / Remove all expired form goes here"
-    return render_template("queryresults.html", pagecontent=remove_form)
+    return render_template("removeform.html", pagecontent=remove_form)
 
 
 @app.route("/removequeryresult")  # Shows the confirmation screen listing the vaccines to be removed from the database.
@@ -109,8 +116,9 @@ def removeactionfeedback():
 
 @app.route("/showall")  # Shows all of the vaccines in the database.
 def showall():
+    timestamp = datetimestamp()
     results_output_html = renderlist(mongoqueryall())
-    return render_template("queryresults.html", pagecontent=results_output_html)
+    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=timestamp)
 
 
 if __name__ == "__main__":
