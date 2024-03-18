@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <div id ="addform">
+                <form method="POST">
+                    <label for="manu_name">Manufacturer Name:  <input type="text" name="manu_name"></label><br>
+                    <label for="lot_no">Lot Number:  <input type="text" name="lot_no"></label><br/>
+                    <label for="exp_date">Expiration Date:  <input type="date" name="exp_date"></label><br/>
+                    <br/>
+                    <input type="submit" value="Submit">
+                </form>
+        </div>
+{% endblock %}
