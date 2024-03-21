@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, make_response
 import pymongo
 from datetime import datetime
 from datetime import timedelta
@@ -16,29 +16,29 @@ client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@
 mydb = client["vaccine_buddy"]  # Name of the database
 mycol = mydb["inventory"]  # Name of the collection
 
-sessionmanager = SessionManager(30)  # Creeate a new sessionmanager object to track query sessions.
+sessionmanager = SessionManager(20)  # Create a new sessionmanager object to track query sessions.
 
 
 def renderlist(inputobj: object) -> str:  # Renders a mongo database query object as html table. Returns a string containing the HTML table.
-    inputdict = list(inputobj)  # Convert the inputted mongo query object into a list so we can access the values a bit easier.
-    results_output_html = "<table>\n\t<tr>\n\t\t<th>Manufacturer</th>\n\t\t<th>Lot Number</th>\n\t\t<th>Expiration Date</th>\n\t</tr>"  # Start the table HTML with headers.
-    for record in inputdict:  # Loop through the array of dictionaries and use their contents to build a string containing the rows of the HTML table for output.
-        results_output_html += "\t<tr>\n\t\t<td>" + str(record["manufacturer"]) + "</td>\n\t\t<td>" + record["lotNum"] + "</td>\n\t\t<td>" + record["expDate"].strftime('%m-%d-%y') + "</td>\n\t</tr>\n"
-    results_output_html += "</table>"  # Concatenate the close table tag to the html now that we are done adding rows.
+    inputlist = list(inputobj)  # Convert the inputted mongo query object into a list so we can access the values a bit easier.
+    if len(inputlist) > 0:
+        results_output_html = "<table>\n\t<tr>\n\t\t<th>Manufacturer</th>\n\t\t<th>Lot Number</th>\n\t\t<th>Expiration Date</th>\n\t</tr>"  # Start the table HTML with headers.
+        for record in inputlist:  # Loop through the array of dictionaries and use their contents to build a string containing the rows of the HTML table for output.
+            results_output_html += "\t<tr>\n\t\t<td>" + str(record["manufacturer"]) + "</td>\n\t\t<td>" + record["lotNum"] + "</td>\n\t\t<td>" + record["expDate"].strftime('%m-%d-%y') + "</td>\n\t</tr>\n"
+        results_output_html += "</table>"  # Concatenate the close table tag to the html now that we are done adding rows.
+    else:
+        results_output_html = "<h1>Our search of the database did not return any results.</h1>"
     return results_output_html
 
 
-#  Custom query string: mongoquerycustom("Astra Zeneca", datetime.strptime("03-13-2024", "%m-%d-%Y"), "MJYOF-01-454422")
-def mongoquerycustom(manu: str, expdate: datetime, lotnum: str) -> object:  # Run a query to find a single item matching the specified criteria. Returns the results as a mongo query object.
-    mongo_query_results = mycol.find({"expDate": expdate, "manufacturer": manu, "lotNum": lotnum})
+def mongoquerycustom(manu_name: str, exp_date: datetime, lot_num: str) -> object:  # Run a query to find a single item matching the specified criteria. Returns the results as a mongo query object.
+    mongo_query_results = mycol.find({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_num})
     return mongo_query_results
 
 
-def mongodelete(deleteobject: object) -> bool:  # Deletes the documents contained in a query object from the database.
-    # TODO: Finish this function so it deletes stuff.
-    mycol.delete_many(deleteobject)
-    success = False
-    return success
+def mongodelete(deleteobject: object) -> int:  # Deletes the documents contained in a query object from the database.
+    result = mycol.delete_many(dict(deleteobject))
+    return result.deleted_count  # Convert the cursor to a dictionary and then pass it to delete_many() for deletion.
 
 
 def mongoqueryweeks(weeks_amt: int) -> object:  # Run a query to show all of the items in the database that are expiring in a defined number of weeks. Returns the results as a mongo query object.
@@ -59,8 +59,7 @@ def mongoqueryexpired() -> object:  # Run a query to show all of the items that 
 
 def datetimestamp() -> str:  # Creates a formatted date/time stamp. Adjusted by the TIMEZONE constant.
     date_time_temp = datetime.utcnow() + timedelta(hours=TIMEZONE)
-    stamp = date_time_temp.strftime('Updated at: %#H:%#M:%#S - %A, %B %#d %Y')
-    return stamp
+    return date_time_temp.strftime('Updated at: %#H:%#M:%#S - %A, %B %#d %Y')
 
 
 @app.route("/")  # Displays a list of all vaccines expiring between today and 2 weeks from today.
@@ -98,28 +97,48 @@ def addresult():
 
 @app.route("/remove")  # Allows the user to remove either one vaccine, or remove all expired vaccines.
 def remove():
-    remove_form = "Remove vaccine / Remove all expired form goes here"
-    return render_template("removeform.html", pagecontent=remove_form)
+    return render_template("removeform.html")
 
 
-@app.route("/removequeryresult")  # Shows the confirmation screen listing the vaccines to be removed from the database.
+@app.route("/removequeryresult", methods=['POST'])  # Shows the confirmation screen listing the vaccines to be removed from the database.
 def removequeryresult():
-    #remove_form_results = renderlist(list(mongoquerycustom(,,,)))
-    return render_template("queryresults.html")  # pagecontent=remove_form_results
+    session_id = sessionmanager.newsession()
+    match request.form.get('submittype'):  # decide what query to run based on the value of the submit button clicked on the previous page.
+        case "Remove Single":  # Remove a single vaccine
+            manu_name = request.form.get('manu_name')  # Get the data values from the form on the previous page and store them in variables.
+            exp_date = request.form.get('exp_date')
+            lot_no = request.form.get('lot_no')
+            sessionmanager.setquery(session_id, manu_name, exp_date, lot_no)  # Store the values in the sessionmanager tied to the session ID
+            query_result = mongoquerycustom(*sessionmanager.getquery(session_id))  # Unpack the values from querymanager and use them to run a query so we can render a result table.
+        case "Remove All Expired":  # Remove all of the expired vaccines.
+            sessionmanager.setquery(session_id)  # Set query values to None to indicate remove all.
+            query_result = mongoqueryexpired()  # Run the expired vaccines query
+    remove_form_results = renderlist(query_result)  # Render the query result as HTML
+    resp = make_response(render_template("removeresults.html", pagecontent=remove_form_results))  # build a response with the render template.
+    resp.set_cookie("sessionmanagerID", session_id)  # set a cookie in the user's browser with the session_id during the response.
+    return resp
 
 
-@app.route("/removeactionfeedback")  # Shows the confirmation on whether the removal of the requested vaccines was successful.
+@app.route("/removeactionfeedback", methods=['POST'])  # Shows the confirmation on whether the removal of the requested vaccines was successful.
 def removeactionfeedback():
-    remove_action_results = "Remove action results go here"
+    ## TODO: Finish this route. Finish the form on the results display page.
+    session_id = request.cookies.get("sessionmanagerID")
+    manu_name, exp_date, lot_no = sessionmanager.getquery(session_id)
+    match manu_name, exp_date, lot_no:
+        case None, None, None: # Case for all expired, no options present.
+            result = mycol.delete_many({"expDate": {"$lt": datetime.now()}})
+        case _:  # Query type "single"
+            result = mycol.delete_many({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_no})
+    remove_action_results = "Succesfully removed {0} entries from the database".format(result)
     return render_template("queryresults.html", pagecontent=remove_action_results)
 
 
 @app.route("/showall")  # Shows all of the vaccines in the database.
 def showall():
-    timestamp = datetimestamp()
+    time_stamp = datetimestamp()
     results_output_html = renderlist(mongoqueryall())
-    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=timestamp)
+    return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
