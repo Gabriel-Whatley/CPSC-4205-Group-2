@@ -18,13 +18,12 @@ class SessionManager:
         return session_id  # Return the session ID to the caller for use in a cookie.
 
     def setquery(self, session_id: str, manu_name: str = None, exp_date: str = None, lot_no: str = None):
-        if exp_date is not None:
-            exp_date = datetime.datetime.strptime(exp_date, "%Y-%m-%d")
+        if exp_date is not None:  # Only convert exp_date to datetime if it has a value, converting a None will cause a crash.
+            exp_date = datetime.datetime.strptime(exp_date, "%Y-%m-%d")  # Convert string produced by form to datetime for use with pymongo.
         self.session_dict.update({session_id: (manu_name, exp_date, lot_no)})  # Update the session in the dict with the tuple.
 
     def getquery(self, session_id: str) -> (str, datetime, str):
-        value = self.session_dict.get(session_id)  # Unpack manu_name, exp_date, lot_no from tuple for this session_id.
-        return value
+        return self.session_dict.get(session_id)  # Unpack manu_name, exp_date, lot_no from tuple for this session_id.
 
     def __cleanup(self):  # Trims the dictionary to the specified amount of max_sessions.
         keys = list(self.session_dict.keys())  # Convert the session IDs (keys) in the dictionary to a list.

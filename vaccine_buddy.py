@@ -3,6 +3,7 @@ import pymongo
 from datetime import datetime
 from datetime import timedelta
 from sessionmanager import SessionManager
+import vaccine_generator
 
 
 # flask app settings
@@ -27,7 +28,7 @@ def renderlist(inputobj: object) -> str:  # Renders a mongo database query objec
             results_output_html += "\t<tr>\n\t\t<td>" + str(record["manufacturer"]) + "</td>\n\t\t<td>" + record["lotNum"] + "</td>\n\t\t<td>" + record["expDate"].strftime('%m-%d-%y') + "</td>\n\t</tr>\n"
         results_output_html += "</table>"  # Concatenate the close table tag to the html now that we are done adding rows.
     else:
-        results_output_html = "<h1>Our search of the database did not return any results.</h1>"
+        results_output_html = "<table><tr><td>Our search of the database did not return any results.</td></tr></table>"
     return results_output_html
 
 
@@ -89,9 +90,13 @@ def add():
     return render_template("addform.html", pagecontent=add_form)
 
 
-@app.route("/addresult")  # Displays confirmation of the query to add a vaccine to the database, shows what was added.
+@app.route("/addresult", methods=['POST'])  # Displays confirmation of the query to add a vaccine to the database, shows what was added.
 def addresult():
-    add_result = "Results of the vaccine addition operation"
+    manu_name = request.form.get('manu_name')  # Get the data values from the form on the previous page and store them in variables.
+    exp_date = request.form.get('exp_date')
+    lot_no = request.form.get('lot_no')
+    result = mycol.insert_one({"manufacturer": manu_name, "lotNum": lot_no, "expDate": datetime.strptime(exp_date, "%Y-%m-%d")})
+    add_result = "Results of the vaccine addition operation were {}".format(result.acknowledged)
     return render_template("queryresults.html", pagecontent=add_result)
 
 
@@ -119,17 +124,16 @@ def removequeryresult():
     return resp
 
 
-@app.route("/removeactionfeedback", methods=['POST'])  # Shows the confirmation on whether the removal of the requested vaccines was successful.
-def removeactionfeedback():
-    ## TODO: Finish this route. Finish the form on the results display page.
-    session_id = request.cookies.get("sessionmanagerID")
-    manu_name, exp_date, lot_no = sessionmanager.getquery(session_id)
+@app.route("/removeactionresult", methods=['POST'])  # Shows the confirmation on whether the removal of the requested vaccines was successful.
+def removeactionresult():
+    session_id = request.cookies.get("sessionmanagerID")  # Get the session ID from the browser cookie.
+    manu_name, exp_date, lot_no = sessionmanager.getquery(session_id)  # Get the query values from the sessionmanager.
     match manu_name, exp_date, lot_no:
-        case None, None, None: # Case for all expired, no options present.
-            result = mycol.delete_many({"expDate": {"$lt": datetime.now()}})
-        case _:  # Query type "single"
-            result = mycol.delete_many({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_no})
-    remove_action_results = "Succesfully removed {0} entries from the database".format(result)
+        case None, None, None:  # Case for remove all expired, no options present.
+            result = mycol.delete_many({"expDate": {"$lt": datetime.now()}})  # Delete everything that is expired.
+        case _:  # For all other values set query type "remove single"
+            result = mycol.delete_many({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_no})  # Run the deletion operation.
+    remove_action_results = "Succesfully removed {0} entries from the database".format(result.deleted_count)  # Display output of how many records were deleted.
     return render_template("queryresults.html", pagecontent=remove_action_results)
 
 
@@ -139,6 +143,12 @@ def showall():
     results_output_html = renderlist(mongoqueryall())
     return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
+
+@app.route("/reset")
+def reset():
+    vaccine_generator.resetdatabase(800)
+    results_output_html = "Finished resetting database, 800 vaccines generated"
+    return render_template("queryresults.html", pagecontent=results_output_html)
 
 if __name__ == "__main__":
     app.run(debug=False)
