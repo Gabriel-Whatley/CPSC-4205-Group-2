@@ -20,7 +20,12 @@ mycol = mydb["inventory"]  # Name of the collection
 sessionmanager = SessionManager(20)  # Create a new sessionmanager object to track query sessions.
 
 
-def renderlist(inputobj: object) -> str:  # Renders a mongo database query object as html table. Returns a string containing the HTML table.
+def renderlist(inputobj: pymongo.cursor.Cursor) -> str:
+    """Renders a mongo database query results object as html table.
+
+    :param inputobj: Results of a pymongo query.
+
+    :returns: html of the table, ready for injection in the webpage"""
     inputlist = list(inputobj)  # Convert the inputted mongo query object into a list so we can access the values a bit easier.
     if len(inputlist) > 0:
         results_output_html = "<table>\n\t<tr>\n\t\t<th>Manufacturer</th>\n\t\t<th>Lot Number</th>\n\t\t<th>Expiration Date</th>\n\t</tr>"  # Start the table HTML with headers.
@@ -32,36 +37,62 @@ def renderlist(inputobj: object) -> str:  # Renders a mongo database query objec
     return results_output_html
 
 
-def mongoquerycustom(manu_name: str, exp_date: datetime, lot_num: str) -> object:  # Run a query to find a single item matching the specified criteria. Returns the results as a mongo query object.
+def mongoquerycustom(manu_name: str, exp_date: str | datetime, lot_num: str) -> pymongo.cursor.Cursor:
+    """Run a query to find a specific item in the database.
+
+    :param manu_name: manufacturer name.
+    :param exp_date: date of vaccine expiration, strings must be formatted 'YYYY-MM-DD'
+    :param lot_num: lot number of the vaccine
+
+    :returns: The results as a mongo query object."""
+    if type(exp_date) == "string":
+        exp_date = datestrconvert(exp_date)
     mongo_query_results = mycol.find({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_num})
     return mongo_query_results
 
 
-def mongodelete(deleteobject: object) -> int:  # Deletes the documents contained in a query object from the database.
-    result = mycol.delete_many(dict(deleteobject))
-    return result.deleted_count  # Convert the cursor to a dictionary and then pass it to delete_many() for deletion.
+def mongoqueryweeks(weeks_amt: int) -> pymongo.cursor.Cursor:
+    """Run a query to show all of the items in the database that are expiring in a defined number of weeks. Returns the results as a mongo query object.
 
+    :param weeks_amt: number of weeks in the future to query.
 
-def mongoqueryweeks(weeks_amt: int) -> object:  # Run a query to show all of the items in the database that are expiring in a defined number of weeks. Returns the results as a mongo query object.
+    :returns: The results as a mongo query object."""
     querydepth = datetime.now() + timedelta(weeks=weeks_amt)  # Calculate the date <weeks_amt> weeks from today's date so we can use it as the max date for the query.
     mongo_query_results = mycol.find({"$and": [{"expDate": {"$lt": querydepth}}, {"expDate": {"$gt": datetime.now()}}]}, projection={"_id": 0}).sort("expDate", 1)
     return mongo_query_results
 
 
-def mongoqueryall() -> object:  # Run a query to show all of the items in the database. Returns the results as a mongo query object.
+def mongoqueryall() -> pymongo.cursor.Cursor:
+    """Run a query to show all of the items in the database. Returns the results as a mongo query object.
+
+    :returns: The results as a mongo query object."""
     mongo_query_results = mycol.find({}, projection={"_id": 0}).sort("expDate", 1)  # Query all rows in database, order by expDate descending, returns the results as a mongo query object.
     return mongo_query_results
 
 
-def mongoqueryexpired() -> object:  # Run a query to show all of the items that have an expiry date that has already passed. Returns the results as a mongo query object.
+def mongoqueryexpired() -> object:
+    """Runs a mongodb query to show all of the items that have an expiry date that has already passed.
+
+    :returns: The results as a mongo query object."""
     mongo_query_results = mycol.find({"expDate": {"$lt": datetime.now()}}, projection={"_id": 0}).sort("expDate", 1)
     return mongo_query_results
 
 
-def datetimestamp() -> str:  # Creates a formatted date/time stamp. Adjusted by the TIMEZONE constant.
+def datetimestamp() -> str:
+    """Creates a formatted date/time stamp. Adjusted by the TIMEZONE constant.
+
+    :returns: formatted string containing the current time and date."""
     date_time_temp = datetime.utcnow() + timedelta(hours=TIMEZONE)
     return date_time_temp.strftime('Updated at: %#H:%#M:%#S - %A, %B %#d %Y')
 
+
+def datestrconvert(date_str: str) -> datetime:
+    """Converts date string from HTML form to datetime object format.
+
+    :param date_str: String of the format YYYY-MM-DD.
+
+    :returns: datetime:datetime object containing the date"""
+    return datetime.strptime(date_str, "%Y-%m-%d")
 
 @app.route("/")  # Displays a list of all vaccines expiring between today and 2 weeks from today.
 def weeks2():
@@ -93,10 +124,10 @@ def add():
 @app.route("/addresult", methods=['POST'])  # Displays confirmation of the query to add a vaccine to the database, shows what was added.
 def addresult():
     manu_name = request.form.get('manu_name')  # Get the data values from the form on the previous page and store them in variables.
-    exp_date = request.form.get('exp_date')
+    exp_date = datestrconvert(request.form.get('exp_date'))
     lot_no = request.form.get('lot_no')
-    result = mycol.insert_one({"manufacturer": manu_name, "lotNum": lot_no, "expDate": datetime.strptime(exp_date, "%Y-%m-%d")})
-    add_result = "Results of the vaccine addition operation were {}".format(result.acknowledged)
+    mycol.insert_one({"manufacturer": manu_name, "lotNum": lot_no, "expDate": exp_date})  # Generate and run the query to add the vaccine.
+    add_result = renderlist(mongoquerycustom(manu_name, exp_date, lot_no))
     return render_template("queryresults.html", pagecontent=add_result)
 
 
