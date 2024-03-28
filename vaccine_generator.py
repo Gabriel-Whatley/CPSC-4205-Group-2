@@ -67,6 +67,7 @@ def generate_vaccines(amount: int):  # Generate random vaccine test data and add
 		result = mycol.insert_one(mydict)  # Add the vaccine record to the database.
 		print(result)  # Print the results of the action to the console.
 
-def resetdatabase(int):
+
+def resetdatabase(vax_num):
 	cleardatabase()
-	generate_vaccines(int)
+	generate_vaccines(vax_num)

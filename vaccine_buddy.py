@@ -45,7 +45,7 @@ def mongoquerycustom(manu_name: str, exp_date: str | datetime, lot_num: str) -> 
     :param lot_num: lot number of the vaccine
 
     :returns: The results as a mongo query object."""
-    if type(exp_date) == "string":
+    if type(exp_date) is "string":
         exp_date = datestrconvert(exp_date)
     mongo_query_results = mycol.find({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_num})
     return mongo_query_results
@@ -70,7 +70,7 @@ def mongoqueryall() -> pymongo.cursor.Cursor:
     return mongo_query_results
 
 
-def mongoqueryexpired() -> object:
+def mongoqueryexpired() -> pymongo.cursor.Cursor:
     """Runs a mongodb query to show all of the items that have an expiry date that has already passed.
 
     :returns: The results as a mongo query object."""
@@ -93,6 +93,7 @@ def datestrconvert(date_str: str) -> datetime:
 
     :returns: datetime:datetime object containing the date"""
     return datetime.strptime(date_str, "%Y-%m-%d")
+
 
 @app.route("/")  # Displays a list of all vaccines expiring between today and 2 weeks from today.
 def weeks2():
@@ -175,11 +176,12 @@ def showall():
     return render_template("queryresults.html", pagecontent=results_output_html, timestamp=time_stamp)
 
 
-@app.route("/reset")
+@app.route("/reset")  # Reset the database, delete all vaccine entries and re-generate 800 records.
 def reset():
     vaccine_generator.resetdatabase(800)
     results_output_html = "Finished resetting database, 800 vaccines generated"
     return render_template("queryresults.html", pagecontent=results_output_html)
+
 
 if __name__ == "__main__":
     app.run(debug=False)
