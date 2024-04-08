@@ -17,7 +17,8 @@ client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@
 mydb = client["vaccine_buddy"]  # Name of the database
 mycol = mydb["inventory"]  # Name of the collection
 
-sessionmanager = SessionManager(20)  # Create a new sessionmanager object to track query sessions.
+# Create a new sessionmanager object to track a maximum of 20 removal query sessions.
+sessionmanager = SessionManager(20)
 
 
 def renderlist(inputobj: pymongo.cursor.Cursor) -> str:
@@ -146,9 +147,9 @@ def removequeryresult():
             exp_date = request.form.get('exp_date')
             lot_no = request.form.get('lot_no')
             sessionmanager.setquery(session_id, manu_name, exp_date, lot_no)  # Store the values in the sessionmanager tied to the session ID
-            query_result = mongoquerycustom(*sessionmanager.getquery(session_id))  # Unpack the values from querymanager and use them to run a query so we can render a result table.
+            query_result = mongoquerycustom(*sessionmanager.getquery(session_id))  # Unpack the values from the tuple returned by querymanager and use them to run a query so we can render a result table.
         case "Remove All Expired":  # Remove all of the expired vaccines.
-            sessionmanager.setquery(session_id)  # Set query values to None to indicate remove all.
+            sessionmanager.setquery(session_id)  # Set all query values to None to indicate remove all query type.
             query_result = mongoqueryexpired()  # Run the expired vaccines query
     remove_form_results = renderlist(query_result)  # Render the query result as HTML
     resp = make_response(render_template("removeresults.html", pagecontent=remove_form_results))  # build a response with the render template.
