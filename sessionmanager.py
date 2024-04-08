@@ -4,8 +4,8 @@ import datetime
 
 
 class SessionManager:
-    #  This object manages a dictionary. The length of the dictionary is capped at the length specified during
-    #  instantiation. When a new key is added to the dictionary, the oldest key/value pair is deleted.
+    """This object manages a dictionary. The length of the dictionary is capped at the length specified during
+    instantiation. When a new key is added to the dictionary, the oldest key/value pair is deleted"""
 
     def __init__(self, max_sessions: int):
         """Converts date string from HTML form to datetime object format.
