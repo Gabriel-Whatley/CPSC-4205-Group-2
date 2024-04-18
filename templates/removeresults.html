@@ -2,8 +2,8 @@
 
 {% block content %}
     <form method="POST" name="remove confirmation" action="{{ url_for('removeactionresult') }}">
-        Would you like to remove the entries listed below from the database?<br/>
-        <input type="submit" value="Yes" name="submittype"><input type="submit" value="No" name="submittype">
+        Would you like to remove the entries listed below from the database?
+        <input type="submit" value="Delete The Vaccine(s)" name="submittype">
     </form>
     {{ pagecontent|safe }}
 {% endblock %}
