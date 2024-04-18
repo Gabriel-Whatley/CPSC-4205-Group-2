@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+        <div id = "addvaccine">
+            <label for = "add-vacc">Add Vaccine</label>
+        </div>
         <div id ="addform">
                 <form method="POST" name="add single" action="{{ url_for('addresult') }}">
                     <label for="manu_name">Manufacturer Name:  <input type="text" name="manu_name" required></label><br>

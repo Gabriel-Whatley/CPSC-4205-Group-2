@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
+        <div id = "removevaccine">
+            <label for = "add-vacc">Remove Single Vaccine</label>
+        </div>
         <div id ="removeform">
                 <form method="POST" name="remove single" action="{{ url_for('removequeryresult') }}">
-                    Remove Single Vaccine<br/>
                     <label for="manu_name">Manufacturer Name:  <input type="text" name="manu_name" required></label>
                     <br/>
                     <label for="lot_no">Lot Number:  <input type="text" name="lot_no" required></label>
@@ -14,11 +16,16 @@
                 </form>
                 <br/>
                 <br/>
-                <form method="POST" name = "remove all expired" action="{{ url_for('removequeryresult') }}">
-                    Remove all expired<br/>
-                    This option will first show a list of all expired vaccines and then offer the option to remove them from the database.
-                    <br/>
-                    <input type="submit" value="Remove All Expired" name="submittype">
+        </div>
+        <div id = "removeallexpired">
+            <label for = "rmv-all">Remove all expired</label>
+        </div>
+        <div id = "removeallform">
+            <form method="POST" name = "remove all expired" action="{{ url_for('removequeryresult') }}">
+                Remove all expired<br/>
+                This option will first show a list of all expired vaccines and then offer the option to remove them from the database.
+                <br/>
+                <input type="submit" value="Remove All Expired" name="submittype">
                 </form>
         </div>
 {% endblock %}
