@@ -46,7 +46,7 @@ def mongoquerycustom(manu_name: str, exp_date: str | datetime, lot_num: str) -> 
     :param lot_num: lot number of the vaccine
 
     :returns: The results as a mongo query object."""
-    if type(exp_date) is "string":
+    if type(exp_date) == "string":
         exp_date = datestrconvert(exp_date)
     mongo_query_results = mycol.find({"manufacturer": manu_name, "expDate": exp_date, "lotNum": lot_num})
     return mongo_query_results

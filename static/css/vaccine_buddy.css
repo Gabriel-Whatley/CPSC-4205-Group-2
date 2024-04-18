@@ -75,3 +75,8 @@ h3{
 #pagecontent {
 
 }
+
+.timestamp {
+    position: absolute;
+    right: 0;
+}
