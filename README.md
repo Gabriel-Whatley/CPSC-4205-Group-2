@@ -1,27 +1,23 @@
-# Project Title
+# Project Description
+This project is designed to allow memebrs of the medical field to review, add, and removed vaccines. It aims to give users a central places to see all vacinnes associated with their office.
 
-[Project Description and Purpose]
+ 
 
-## Table of Contents
-- [Project Title]
-  - [Table of Contents]
-  - [About]
-  - [Installation]
-  - [Usage]
-  - [Contributing]
-  - [License]
+## Installation
+
+git clone 
+
 
 ## About
 
 
-## Installation
+
+## Credit
+This project was created by Gabe Whatley, Jaden Torres, and Adrian Wade. You find more about them at......
 
 
-## Usage
 
 
-## Contributing
 
 
-## License
 
