@@ -1,5 +1,5 @@
 # Project Description
-This project is designed to allow memebrs of the medical field to review, add, and removed vaccines. It aims to give users a central places to see all vacinnes associated with their office. We used flask and mongodb.
+This project is designed to allow members of the medical field to review, add, and removed vaccines. It aims to give users a central places to see all vacinnes associated with their office. We used flask and mongodb.
 
  
 
