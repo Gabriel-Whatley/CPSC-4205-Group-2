@@ -19,7 +19,7 @@ npm install
 
 
 ## Credit
-This project was created by Gabe Whatley, Jaden Torres, and Adrian Wade. You find more about them at https:///vaccine-buddy.onrender.com/
+This project was created by Gabe Whatley, Jaden Torres, and Adrian Wade. You find more about them at https://vaccine-buddy.onrender.com/
 
 
 
