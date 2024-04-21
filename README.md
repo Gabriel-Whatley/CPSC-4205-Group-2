@@ -4,11 +4,17 @@ This project is designed to allow memebrs of the medical field to review, add, a
  
 
 ## Installation
+Clone this repository to your local machine
+git clone https://github.com/Gabriel-Whatley/CPSC-4205-Group-2
 
-git clone 
+Navigate to the project directory
+cd CPSC-4205-Group-2
+
+Install dependencies
+npm install
 
 
-## About
+## Usage
 
 
 
