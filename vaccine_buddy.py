@@ -13,7 +13,7 @@ app = Flask(__name__)
 TIMEZONE = -5
 
 # Mongo database client connection settings
-client = pymongo.MongoClient("mongodb+srv://vaccine_buddy_user:Br4bODkOhkhvcOU0@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
+client = pymongo.MongoClient("mongodb+srv://<USER>:<PASSWORD>@cluster0.2efzlbn.mongodb.net/?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
 mydb = client["vaccine_buddy"]  # Name of the database
 mycol = mydb["inventory"]  # Name of the collection
 
